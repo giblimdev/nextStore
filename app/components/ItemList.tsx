@@ -1,12 +1,44 @@
+/*
+import { create } from "zustand";
+
+interface NavStore {
+  store: string | null;
+  category: string | null;
+  classe: string | null;
+  subClass: string | null;
+  setStore: (store: string | null) => void;
+  setCategory: (category: string | null) => void;
+  setClasse: (classe: string | null) => void;
+  setSubClass: (subClass: string | null) => void;
+}
+
+export const useNavStore = create<NavStore>((set) => ({
+  store: null,
+  category: null,
+  classe: null,
+  subClass: null,
+  setStore: (store) => set({ store, category: null, classe: null, subClass: null }),
+  setCategory: (category) => set({ category, classe: null, subClass: null }),
+  setClasse: (classe) => set({ classe, subClass: null }),
+  setSubClass: (subClass) => set({ subClass }),
+}));
+
+*/
 "use client";
 
-import React from "react";
-import { itemList } from "@/lib/data/dataItemList";
+import React, { useEffect, useState } from "react";
+import { itemList as staticItemList } from "@/lib/data/dataItemList";
 
 const ItemList: React.FC = () => {
+  const [items, setItems] = useState<typeof staticItemList>([]);
+
+  useEffect(() => {
+    setItems(staticItemList);
+  }, []);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
-      {itemList.map((item) => (
+      {items.map((item) => (
         <div key={item.id} className="card bg-base-100 shadow-xl">
           <figure>
             <img src={item.mainImage} alt={item.title} className="h-48 w-full object-cover" />

@@ -36,10 +36,10 @@ export default function Header() {
           />
           <span>🔍</span>
         </div>
-        <div className="flex">
+        <div className=" border flex p-2">
           
-      <div><Link href="/dev">Dev</Link></div>
-      <div><Link href="/admin">Admin</Link></div>
+      <button className="border m-2"><Link href="/dev">Dev</Link></button>
+      <button className="border m-2"><Link href="/admin">Admin</Link></button>
         </div>
         <div className="flex items-center space-x-4">
           <span>🛒</span>
@@ -60,14 +60,18 @@ export default function Header() {
         ))}
       </div>
       <Nav />
+      
+      {/*
       <div style={{ width: "100%", height: "200px", position: "relative" }}>
+      
         <Image
           src="/Capture d’écran 2025-02-12 205854.png"
           alt="Header Image"
           layout="fill"
           objectFit="cover"
         />
-      </div>
+        
+      </div> */}
     </div>
   );
 }

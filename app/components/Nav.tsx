@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavStore } from "@/store/navStore";
 import { getCategories, getClasses, getSubClasses } from "@/lib/utils/navhelper";
-import ItemList from "./ItemList"; // Assuming you have an ItemList component
+//import ItemList from "./ItemList";
 
 const Nav: React.FC = () => {
   const { store, category, classe, subClass, setCategory, setClasse, setSubClass } = useNavStore();
@@ -20,7 +20,6 @@ const Nav: React.FC = () => {
   const toggleCategory = (catTitle: string) => {
     setExpandedCategory((prev) => (prev === catTitle ? null : catTitle));
     setCategory(catTitle);
-    // Do not update store here
   };
 
   const toggleClasse = (clTitle: string) => {
@@ -30,11 +29,12 @@ const Nav: React.FC = () => {
 
   const handleSubClassClick = (subTitle: string) => {
     setSubClass(subTitle);
-    // Hide the menu and display ItemList
   };
 
+  // If subClass is set, hide Nav and show ItemList
   if (subClass) {
-    return <ItemList subClass={subClass} />;
+    //return <ItemList subClass={subClass} />;
+    return null; // Hide Nav when ItemList is displayed
   }
 
   return (
