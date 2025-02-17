@@ -3,10 +3,12 @@ import React from 'react'
 
 export default function page() {
   return (
-  <div>
-    <h1>AdminPage</h1>
-    <div><Link rel="stylesheet" href="item">Gestion des Articles</Link></div>
-    <div><Link rel="stylesheet" href="commande">Gestion des Commandes</Link></div>
+  <div className='p-5'>
+    <h1>AdminPage </h1><span>Visible uniquement par les Admin</span>
+    <div className="border rounded-lg bg-slate-50 flex">
+      <div className='m-2'><Link rel="stylesheet" href="item">Gestion des Articles</Link></div>
+      <div className='m-2'><Link rel="stylesheet" href="commande">Gestion des Commandes</Link></div>
+    </div>
     <div>
       <h2>Fonctionemetn de la base de données</h2>
       <div>
