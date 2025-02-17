@@ -1,0 +1,284 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// 🔹 Table des utilisateurs
+model User {
+  id        Int      @id @default(autoincrement())
+  pseudo    String?  @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orders      Order[]
+  cartItems   CartItem[]
+  loyaltyCard LoyaltyCard?
+  reviews     Review[]
+  Procurement Procurement[]
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+/// 🔹 Table des magasins
+model Store {
+  id    String @id @default(uuid())
+  title String
+
+  // Relations
+  categories Category[]
+  items      Item[]
+}
+
+/// 🔹 Table des catégories
+model Category {
+  id          String  @id @default(uuid())
+  storeId     String
+  title       String
+  description String?
+
+  // Relations
+  store   Store    @relation(fields: [storeId], references: [id])
+  classes Classe[]
+  items   Item[]
+}
+
+/// 🔹 Table des classes
+model Classe {
+  id         String @id @default(uuid())
+  categoryId String
+  title      String
+
+  // Relations
+  category   Category    @relation(fields: [categoryId], references: [id])
+  subClasses SubClasse[]
+  items      Item[]
+}
+
+/// 🔹 Table des sous-classes
+model SubClasse {
+  id       String @id @default(uuid())
+  classeId String
+  title    String
+
+  // Relations
+  classe Classe @relation(fields: [classeId], references: [id])
+  items  Item[]
+}
+
+/// 🔹 Table des articles (Item)
+model Item {
+  id          String  @id @default(uuid())
+  storeId     String // Identifiant du magasin (clé étrangère vers Store)
+  categoryId  String // Identifiant de la catégorie (clé étrangère vers Category)
+  classeId    String? // Identifiant de la classe (clé étrangère vers Classe, optionnel)
+  subClasseId String? // Identifiant de la sous-classe (clé étrangère vers SubClasse, optionnel)
+
+  title       String // Nom du produit
+  slug        String  @unique // URL conviviale (doit être unique)
+  summary     String? // Résumé court (pour les aperçus)
+  description String // Description détaillée
+  brand       String? // Marque du produit
+
+  price    Float // Prix actuel
+  oldPrice Float? // Ancien prix (pour les promotions)
+  discount Int? // Réduction (pourcentage ou montant fixe)
+  currency String // Devise (ex: "EUR", "USD")
+
+  stockQuantity Int // Quantité en stock
+  isAvailable   Boolean // Disponibilité (en stock ou non)
+
+  dimensions Json? // Dimensions (JSON)
+  weight     Float? // Poids (optionnel)
+
+  colors String[] // Couleurs disponibles
+  sizes  String[] // Tailles disponibles
+
+  mainImage String // URL de l'image principale
+  addImages String[] // URLs des images supplémentaires
+
+  rating Float? // Note moyenne (optionnel)
+
+  saleStartDate DateTime? // Date de début de la promotion (optionnel)
+  saleEndDate   DateTime? // Date de fin de la promotion (optionnel)
+
+  usageInstructions String? // Instructions d'utilisation (optionnel)
+  specifications    String // Spécifications techniques (JSON)
+
+  Review Review[]
+  ProcurementItem ProcurementItem[]
+  
+
+  metaTitle       String? // Meta-titre pour le SEO (optionnel)
+  metaDescription String? // Meta-description pour le SEO (optionnel)
+
+  // Relations (assurez-vous que les modèles correspondants existent)
+  store     Store      @relation(fields: [storeId], references: [id])
+  category  Category   @relation(fields: [categoryId], references: [id])
+  classe    Classe?    @relation(fields: [classeId], references: [id])
+  subClasse SubClasse? @relation(fields: [subClasseId], references: [id])
+}
+
+/// 🔹 Table des SKU (Stock Keeping Unit)
+model SKU {
+  id        String   @id @default(uuid())
+  itemId    String
+  isInStock Boolean
+  createdAt DateTime @default(now())
+  saledDate DateTime 
+  skuState  SkuState   //(vendu / ordered)
+  // Relations
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+enum SkuState {
+  avaible
+  ordering
+}
+
+/// 🔹 Table des avis (Reviews)
+model Review {
+  id        String   @id @default(uuid())
+  userId    Int
+  itemId    String
+  rating    Float
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  item Item @relation(fields: [itemId], references: [id])
+}
+
+/// 🔹 Table du panier (Cart)
+model CartItem {
+  id       String @id @default(uuid())
+  userId   Int
+  skuId    String
+  quantity Int    @default(1)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  sku  SKU  @relation(fields: [skuId], references: [id])
+}
+
+/// 🔹 Table des commandes (Order)
+model Order {
+  id         String      @id @default(uuid())
+  userId     Int
+  totalPrice Float
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+  payment    Payment
+}
+enum Payment {
+  SUCCES  
+  PENDING
+  FAILED
+}
+
+/// 🔹 Table des éléments de commande (OrderItem)
+model OrderItem {
+  id       String @id @default(uuid())
+  orderId  String
+  skuId    String
+  quantity Int
+  price    Float
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id])
+  sku   SKU   @relation(fields: [skuId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+/// 🔹 Table des paiements (Transaction)
+model Transaction {
+  id        String        @id @default(uuid())
+  orderId   String        @unique // Relation one-to-one avec Order
+  amount    Float
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+/// 🔹 Table de fidélité (LoyaltyCard)
+model LoyaltyCard {
+  id        String   @id @default(uuid())
+  userId    Int      @unique
+  points    Int      @default(0)
+  exp       Int      @default(0)
+  createdAt DateTime @default(now())
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+}
+
+/// 🔹 Table des fournisseurs (Supplier)
+model Supplier {
+  id          String    @id @default(uuid())
+  name        String
+  procurement Procurement[]
+  } 
+
+/// 🔹 Table des commandes d'approvisionnement (Procurement)
+model Procurement {
+  id          String    @id @default(uuid())
+  userId      Int
+  shippedDate DateTime?
+  receivedDate DateTime?
+  notes       String?
+  supplierId  String
+  items       ProcurementItem[]
+  status      ProcurementStatus @default(PENDING)
+  totalAmount Float? // Total amount of the procurement
+ // Relations
+  user User @relation(fields: [userId], references: [id])
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+}
+enum ProcurementStatus {
+  PENDING
+  ORDERED
+  SHIPPED
+  RECEIVED
+  COMPLETED
+  CANCELLED
+}
+
+/// 🔹 Table des éléments de commande d'approvisionnement (ProcurementItem)
+model ProcurementItem {
+  id            String      @id @default(uuid())
+  itemId        String
+  procurement   Procurement @relation(fields: [procurementId], references: [id])
+  procurementId String
+  quantity      Int
+  price         Float       // Price per unit at the time of procurement
+  item          Item        @relation(fields: [itemId], references: [id]) // The missing relation!
+}

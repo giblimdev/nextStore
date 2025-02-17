@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@prisma/client": "^6.3.1",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -21,7 +23,11 @@
     "@types/react-dom": "^19",
     "daisyui": "^4.12.23",
     "postcss": "^8",
+    "prisma": "^6.3.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
